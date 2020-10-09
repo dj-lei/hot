@@ -34,7 +34,7 @@ if __name__ == "__main__":
     parser.add_argument("--n_cpu", type=int, default=0, help="number of cpu threads to use during batch generation")
     parser.add_argument("--img_size", type=int, default=416, help="size of each image dimension")
     parser.add_argument("--checkpoint_model", type=str, help="path to checkpoint model")
-    parser.add_argument("--image_csv", type=str, default="test.csv", help="all image crawl csv")
+    parser.add_argument("--image_csv", type=str, default="links.csv", help="all image crawl csv")
     parser.add_argument("--filter_size", type=int, default=10000, help="all image crawl csv")
     opt = parser.parse_args()
     print(opt)
@@ -120,12 +120,12 @@ if __name__ == "__main__":
                 x2 = float(x2)
                 box_w = x2 - x1
                 box_h = y2 - y1
-                if (classes[int(cls_pred)] != 'person') & (box_h * box_w < opt.filter_size):
+                if (classes[int(cls_pred)] != 'person') | (box_h * box_w < opt.filter_size):
                     continue
                 print("\t+ Label: %s, Conf: %.5f" % (classes[int(cls_pred)], cls_conf.item()))
 
                 cropped = result_image.crop((x1, y1, x2, y2))  # (left, upper, right, lower)
-                save_path = f"output/{filename}_"+str(count)+'.png'
+                save_path = f"output/{filename}_"+str(count)+'.jpg'
                 cropped.save(save_path)
                 count = count + 1
                 train_images_path.append(save_path)
