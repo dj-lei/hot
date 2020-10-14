@@ -21,6 +21,9 @@ model_urls = {
 
 
 def get_cosine_similarity(a, b):
+    a, b = np.asarray(a), np.asarray(b)
+    a = a / np.linalg.norm(a)
+    b = b / np.linalg.norm(b)
     return 1 - spatial.distance.cosine(a, b)
 
 
