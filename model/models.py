@@ -20,6 +20,13 @@ model_urls = {
 }
 
 
+def get_good_mean_cosine(good_image_vector, list_best_seller_vectors):
+    total_cosine = 0
+    for vector in list_best_seller_vectors:
+        total_cosine += get_cosine_similarity(good_image_vector, vector)
+    return total_cosine / len(list_best_seller_vectors)
+
+
 def get_cosine_similarity(a, b):
     a, b = np.asarray(a), np.asarray(b)
     a = a / np.linalg.norm(a)

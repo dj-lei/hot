@@ -41,7 +41,7 @@ class KeyWordsSpider(Spider):
         ActionChains(self.driver).move_to_element(ele).perform()
 
         while len(self.driver.find_elements_by_xpath(cf.get('themes'))) == 0:
-            pass
+            ActionChains(self.driver).move_to_element(ele).perform()
 
         themes = self.driver.find_elements_by_xpath(cf.get('themes'))
         for i, theme in enumerate(themes):
@@ -102,6 +102,7 @@ class MultiPageSpider(Spider):
         self.driver.get(url)
         page_nums = int(self.driver.find_elements_by_xpath(cf.get('page_num')[:-1])[0].text.split(
             cf.get('page_num')[-1])[1])
+        page_nums = 5
         final = pd.DataFrame([], columns=items_list)
         data = pd.DataFrame([], columns=items_list)
         for page_num in range(0, page_nums):
@@ -109,9 +110,10 @@ class MultiPageSpider(Spider):
             while True:
                 result = [len(self.driver.find_elements_by_xpath(cf.get(item))) for item in items_list]
                 if (0 not in result) & (len(set(result)) == 1):
-                    for i in range(0, 50):
+                    for i in range(0, 45):
                         self.driver.execute_script("document.documentElement.scrollTop=" + str(i * 200 + 200))
-                        time.sleep(0.05)
+                        time.sleep(0.1)
+                    time.sleep(0.5)
                     break
 
             # extraction info
@@ -131,6 +133,12 @@ class MultiPageSpider(Spider):
                     continue
                 break
 
+            # quit when the per page of items of duplicate are greater than a half
+            current_num = len(final)
+            final = final.append(data).drop_duplicates(items_list).reset_index(drop=True)
+            if len(final) < current_num + int(len(data) / 2):
+                break
+
             # last page quit
             if page_num == (page_nums - 1):
                 break
@@ -139,11 +147,5 @@ class MultiPageSpider(Spider):
             self.driver.find_elements_by_xpath(cf.get('click'))[0].click()
             while current_url == self.driver.current_url:
                 pass
-
-            # quit when the per page of items of duplicate are greater than a half
-            current_num = len(final)
-            final = final.append(data).drop_duplicates(items_list).reset_index(drop=True)
-            if len(final) < current_num + int(len(data) / 2):
-                break
 
         return final
